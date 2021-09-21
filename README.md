@@ -4,31 +4,30 @@ This is a simple **"Hello world"** done with **Java** programming language.
 
 ## Source code
 
-This is the source code of the program:
+Creating a Project
+You need somewhere for your project to reside. Create a directory somewhere and start a shell in that directory. On your command line, execute the following Maven goal:
 
-```java
-public class HelloWorld {
-  public static void main(String[] args) {
-    System.out.println("Hello world!");
-  }
-}
+mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.4 -DinteractiveMode=false
 ```
 
 Notice that `System.out.println("Hello world!");` shows the string `"Hello world!"` on the screen.
 
 ## Compile program
 
-To compile the "Hello World" program, type the following:
+Build the Project
+mvn package
 
-```console
-javac HelloWorld.java
-```
+The command line will print out various actions, and end with the following:
+
+ ...
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.953 s
+[INFO] Finished at: 2019-11-24T13:05:10+01:00
+[INFO] ------------------------------------------------------------------------
 
 ## Excute the program
 
-To execute the program, type this:
-
-```console
-java HelloWorld
-```
+java -cp target/my-app-1.0-SNAPSHOT.jar com.mycompany.app.App
 
