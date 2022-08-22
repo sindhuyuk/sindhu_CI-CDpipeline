@@ -1,3 +1,4 @@
+from math import fabs
 import boto3
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -79,12 +80,17 @@ def delete_inactive_access_key(username):
             if access_key['Status'] == 'Inactive' and active_for.days <= 5:
                 # username = user['UserName']
                 print ("\n======================Checking for INACTIVE keys if any will rotation older then 75 days===========")
-                print("\nStep_1. user Key2   "+ user +":  "+ str(active_for.days) +"         Old key currently Inactive state deleting ----------------- [Deleting]")
+                
                 response = iam_client.delete_access_key(
                         UserName = user,
                         AccessKeyId = access_key['AccessKeyId']
                 )
-                print('Deleting access key {0}.'.format(key['AccessKeyId']) +username)
+                print("\nStep_1. Found user "+ user +"  : Key2  Inactive since   "+ str(active_for.days) +"   Days Old key  ----------------- [Deleted]")
+                # print('Deleting access key {0}.'.format(key['AccessKeyId']) +username)
+                
+                return True
+            else:
+                return False
     except ClientError as e:
         print("An error has occurred attempting to rotate user %s access keys." %
             username)
@@ -110,7 +116,7 @@ try:
     for page in paginator.paginate(PaginationConfig={'PageSize': 100, 'StartingToken': marker}):
         MaxItems = 10
         u = page['Users']
-        print("==========================================================================")
+        print("================================IAM checking keys Rotation ==========================================")
         for user in u:
             keys = iam_client.list_access_keys(UserName=user['UserName'])
             for key in keys['AccessKeyMetadata']:
@@ -118,18 +124,19 @@ try:
                 
                 # With active keys older than 90 days
                 if key['Status'] == 'Active' and active_for.days <= 90:
-                    print("Step_1. user: "+user['UserName'] + " --AccessKeyId-- " + key['AccessKeyId'] + " - " + str(
-                        active_for.days) + " Old key rotation required creating new key .....")
+                    print("Step_1. Found user: "+user['UserName'] + " --AccessKeyId-- " + key['AccessKeyId'] + " - " + str(
+                        active_for.days) + " Older key Need rotation ==================== [Checking for Inactvie keys]\n\n")
                     # check inactive key for this current user and if any present  delete
                     username = user['UserName']
-                    delete_inactive_access_key(username)
+                    sc=delete_inactive_access_key(username)
+                    print(sc)
                     # Creating new key
 
                     
                 # Grace period 5 day on top 90 days over now 95 days and rquired to Inactivating the old key
                 elif key['Status'] == 'Active' and active_for.days >= 5:
                     print(user['UserName'] + " - " + key['AccessKeyId'] + " - " + str(active_for.days) +
-                          "XXXXXXXXXX  Grace period 5 day on top 90 days over now Inactivating the old key")
+                          "XXXXXXXXXX  Grace period 5 day on top 90 days over now Inactivating the old key\n\n")
                     # iam_client.update_access_key(UserName=user['UserName'], AccessKeyId=key['AccessKeyId'], Status='Inactive')
 except ClientError as e:
     print("An error has occurred attempting to rotate user %s access keys." %
